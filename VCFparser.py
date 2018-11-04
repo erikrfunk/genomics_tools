@@ -41,7 +41,7 @@ class Variants():
         self.length = length
         
         
-    def Vcf_convert(self, genoformat = None):
+    def genotype_convert(self, genoformat = None):
         if genoformat not in [None,'raw','numeric','base']:
             print("genotype formate should be genoformat= 'raw', 'numeric' (0/1), or 'base' (A/G)")
         elif genoformat is None:
@@ -73,7 +73,7 @@ class Variants():
                 new_genos.append(temp_genos)
             return(new_genos)
 
-    def Index_pops(self, popsFile):
+    def index_pops(self, popsFile):
         '''Use the popinfo file or individuals listed in arguments to separate the samples into populations. Returns dictionary.'''
         #Need to add individuals option
         with open(popsFile, 'r') as p:
@@ -86,3 +86,50 @@ class Variants():
                 pops[line.split()[1]] = [self.header.index(line.split()[0])]
         return pops
 
+    def fasta_format(self, outfile = 'output', popsFile=None,
+    whichsnp = 'random', individuals=None, pop=None):
+        #Includes two options relating to heterozygotes.
+        #'Random' chooses either the ancestral or derived snp randomly
+        #'pair' includes both snps, one right after the other with the
+        #ancestral listed first
+        assert(whichsnp in ['random','pair']), "'whichsnp' needs to be either random or pair. Default is random"
+        #Make a dictionary of indices for individuals to be used
+        Samps_to_include = []
+        if pop is not None:
+            PopIndex = self.index_pops(popsFile)
+            assert(pop in PopIndex), "Population specified is not in the populations file"
+            Samps_to_include = PopIndex[pop]
+        #elif individuals is not None:
+            #if endswith .txt
+            #Open the file with individuals in it and make dict
+            #with them and index
+            #else set the individual in the same dict
+        else:
+            Samps_to_include = self.individual_index
+        print(Samps_to_include)
+        #Strip down the genotypes using the 'genotype_convert' func above
+        #Then evaluate which format to create using 'whichsnp'
+        #and construct the fasta file accordingly
+        formatted_genotypes = self.genotype_convert(genoformat = 'base')
+        reference_index = self.header.index('REF')
+        if whichsnp == 'pair':
+            filename = (outfile + '.txt')
+            fout = open(filename, 'w+')
+            for sample in Samps_to_include:
+                sequence_header = str('>{0}\n'.format(sample))
+                fout.write(sequence_header)
+                sequence = ''
+                for genotype in formatted_genotypes:
+                    temp_geno = genotype[Samps_to_include[sample]].split('/')
+                    #If the length of the set is one (homozygous) add the bases
+                    if len(set(temp_geno)) == 1:
+                        sequence += ''.join(temp_geno)
+                    #The the length of the set is two, added the ref snp first, then the alt 
+                    else:
+                        sequence += genotype[reference_index]
+                        temp_geno.remove(genotype[reference_index])
+                        sequence += ''.join(temp_geno)
+                fout.write(sequence)
+                fout.write('\n')
+            fout.close()
+        #else: #This should evaluate whichsnp == 'random'
