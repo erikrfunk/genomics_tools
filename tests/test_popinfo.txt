@@ -1,5 +1,5 @@
 seq1	pop1
 seq2	pop1
 seq3	pop1
-seq4	pop1
-seq5	pop1
+seq4	pop2
+seq5	pop2

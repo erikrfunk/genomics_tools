@@ -49,11 +49,10 @@ def FileParse(Infile):
     for line in fasta:
         if line[0] == ">":
             seqcounter += 1
-            seq = line.strip()
-            sample_names.append(seq[1:])
+            sample_names.append(line[1:])
         else:
             if len(sequences) == (seqcounter - 1):
-                sequences.append(line.strip())
+                sequences.append(line)
             else:
                 sequences[(seqcounter - 1)] = sequences[(seqcounter - 1)] + line.strip()
     all_seqs = dict(zip(sample_names,sequences))
@@ -72,57 +71,44 @@ def SetPops(popsFile):
             pops[line.split()[1]] = [line.split()[0]]
     return pops   
 
-def Pi(Infile, popsFile, pop):
+def Pi(Infile, popsFile, pop = None):
     '''Calculate pairwise nucleotide diversity within a population'''
     Sequences = FileParse(Infile)
     Populations = SetPops(popsFile)
     print("File contains",len(Sequences),"sequences across",len(Populations),"populations")
-    print("and",len(Populations[pop]),"samples in the",pop,"population")
-    #print("Sequence are:", Sequences)
-    #pops_matrix = [populations[pop],populations[pop]]
     if pop is not None:
+        print("and",len(Populations[pop]),"samples in the",pop,"population")
         Comparisons = list(combinations(Populations[pop],2))
-        #print(Comparisons)
         AlleleFreq = (1/len(Populations[pop]))
-        #print(AlleleFreq)
         PiVals = []
         for Pair in Comparisons:
             PairwiseDiffs = []
-            #print(Sequences[Pair[0]])
             for Base in range(len(Sequences[Pair[0]])):
                 BaseColumn = []
-                #print(Sequences[Pair[0]][Base])
                 for x in range(len(Pair)):
                     BaseColumn.append(Sequences[Pair[x]][Base])
                 PairwiseDiffs.append(len(list(set(BaseColumn))) - 1)
-                #print(BaseColumn)
-            print(PairwiseDiffs)
             PiVals.append((sum(PairwiseDiffs) / (len(Sequences[Pair[0]]))) * (AlleleFreq**2))
         Pi = (len(Populations[pop]) / (len(Populations[pop])-1)) * (sum(PiVals))
         return Pi
-        '''
-        for samp1 in pops_matrix[0]:
-            for samp2 in pops_matrix[1]:
-                print("samples being compared are:", samp1, samp2)
-                if samp1 == samp2 or str(samp2 + ' vs ' + samp1) in comps: #avoids duplicate comparisons
-                    pass
-                else:
-                    comps.append(str(samp1 + ' vs ' + samp2))
-                    seq_matrix = [sequences[samp1],sequences[samp2]]
-                    variability_count = []
-                    for basepair in range(len(seq_matrix[1])):
-                        base_col = []
-                        for seq in seq_matrix:
-                            base_col.append(seq[basepair])
-                        PairwiseDiffs = (len(set(base_col))-1)/(len(seq_matrix[1]))
-                        variability_count.append(PairwiseDiffs*(AlleleFreq**2))
-                    pi_vals.append(((sum(variability_count) - len(seq_matrix[0]))/len(seq_matrix[0]))*100)                        
-        '''
-        average_pi = sum(pi_vals)
     else:
-        
-        print('Population is variable in ' + str(average_pi) + ' percent of sites')
-                
+        Pi = {}
+        PiVals = []
+        for group in Populations:
+            Comparisons = list(combinations(Populations[group],2))
+            AlleleFreq = (1/len(Populations[group]))
+            PiVals = []
+            for Pair in Comparisons:
+                PairwiseDiffs = []
+                for Base in range(len(Sequences[Pair[0]])):
+                    BaseColumn = []
+                    for x in range(len(Pair)):
+                        BaseColumn.append(Sequences[Pair[x]][Base])
+                    PairwiseDiffs.append(len(list(set(BaseColumn))) - 1)
+                PiVals.append((sum(PairwiseDiffs) / (len(Sequences[Pair[0]]))) * (AlleleFreq**2))
+            Pi[group] = (len(Populations[group]) / (len(Populations[group])-1)) * (sum(PiVals))
+        return Pi
+       
 def Dxy(Infile, popsFile, pop1, pop2):
     '''Calculate pairwise sequence divergence by averaging pairwise distance across populations'''
 

@@ -48,8 +48,8 @@ def Pi(snps_file,pops, pop = None): # Currently broken!! Needs altering to retur
     print("Formatting vcf...")
     Vcf = Variants(snps_file)
     GenomeLength = Vcf.length
-    GenotypeLines = Vcf.Vcf_convert(genoformat = 'base')
-    PopIndex = vcf.Index_pops(popsFile = pops)
+    GenotypeLines = Vcf.genotype_convert(genoformat = 'base')
+    PopIndex = vcf.index_pops(popsFile = pops)
     print("Calculating average pairwise nucleotide diversity across", Vcf.length, "base pairs")
     Pi = {}
     if pop is not None:
@@ -94,8 +94,8 @@ def Wattersons_theta(snps_file,pops,pop = None):
     print("Formatting vcf...")
     Vcf = Variants(snps_file)
     GenomeLength = Vcf.length
-    GenotypeLines = Vcf.Vcf_convert(genoformat = 'base')
-    PopIndex = Vcf.Index_pops(popsFile = pops)
+    GenotypeLines = Vcf.genotype_convert(genoformat = 'base')
+    PopIndex = Vcf.index_pops(popsFile = pops)
     Theta = {}
     if pop is not None:
         SegSites = 0
