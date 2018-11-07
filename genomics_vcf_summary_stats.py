@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 Calculate some basic genomic diversity and summary statistics.
 
