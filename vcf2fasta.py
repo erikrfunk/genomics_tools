@@ -1,6 +1,38 @@
 #!usr/bin/env python
 
+import argparse
 from VCFparser import Variants
+
+def get_args():
+    parser = argparse.ArgumentParser(description='Convert vcf to fasta ')
+    parser.add_argument(
+        '--input',
+        required = True,
+        help = 'A vcf file to convert'
+    )
+    parser.add_argument(
+        '--output',
+        required = False,
+        default='output'
+    )
+    parser.add_argument(
+        '--popinfo',
+        required = False,
+        default=None,
+        help = 'A file with two columns where the first is sample name and the second is population name'
+    )
+    parser.add_argument(
+        '--whichsnp',
+        required = False,
+        default = 'random',
+        help = 'Set how the file will handle diploids: set "pair" to include both the ref and alt alleles in the fasta. Defaul chooses random.'
+    )
+    parser.add_argument(
+        '--individuals',
+        required = False,
+        default = None,
+        help = 'A file with sample names of individuals to include in the fasta')
+    return parser.parse_args()
 
 def vcf2fasta(infile, outfile = 'output', popsFile=None,
     whichsnp = 'random', individuals=None, pop=None):
@@ -55,3 +87,13 @@ def vcf2fasta(infile, outfile = 'output', popsFile=None,
                     fout.write('\n')
 
         #else: #This should evaluate whichsnp == 'random'
+
+def main():
+        arguments = get_args()
+        print(arguments)
+        vcf2fasta(arguments.input, arguments.output,
+                  whichsnp = arguments.whichsnp
+        )
+
+if __name__ == '__main__':
+    main()
