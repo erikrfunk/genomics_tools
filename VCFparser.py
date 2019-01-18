@@ -7,7 +7,7 @@ class Variants():
     '''
     Create a vcf class with:
 
-    A modified vcf output that just includes genotypes, 
+    A modified vcf output that just includes genotypes,
     A dictionary of individual's index
     A list of indices for individuals in a set of populations
     '''
@@ -16,7 +16,7 @@ class Variants():
 
         self.infile = infile
         self.popsfile = popsfile
-        
+
         with open (infile, 'r') as f:
             vcf = [line.strip() for line in f.readlines()]
         genos = []
@@ -26,21 +26,21 @@ class Variants():
             text = str(i)
             if re.match('^#[^#]',text):
                 header = i.split()
-            elif not i.startswith('#'):
+            elif not re.match('^#',text):
                 genos.append(i)
             elif re.match('^##contig',text):
                 p = re.compile('length=[0-9]+')
                 m = p.search(i)
                 length += int(m.group()[7:])
-                
+
         self.samplenames = header[9:]
         self.samplenumber = len(self.samplenames)
         self.individual_index = dict(zip(self.samplenames,map(lambda x: header.index(x),self.samplenames)))
         self.rawgenotypes = genos
         self.header = header
         self.length = length
-        
-        
+
+
     def genotype_convert(self, genoformat = None):
         if genoformat not in [None,'raw','numeric','base']:
             print("genotype formate should be genoformat= 'raw', 'numeric' (0/1), or 'base' (A/G)")
@@ -57,7 +57,7 @@ class Variants():
                         temp_genos[temp_genos.index(field)] = temp_genos[temp_genos.index(field)].split(sep = ':')[0]
                 new_genos.append(temp_genos)
             return(new_genos)
-        else:
+        else: # genoformat == 'base'
             reference_index = self.header.index('REF')
             alternate_index = self.header.index('ALT')
             new_genos = []
