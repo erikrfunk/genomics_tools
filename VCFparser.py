@@ -17,8 +17,12 @@ class Variants():
         self.infile = infile
         self.popsfile = popsfile
 
-        with open (infile, 'r') as f:
-            vcf = [line.strip() for line in f.readlines()]
+        if re.match('.gz$',infile):
+            with gzip.open(infile,'r') as f:
+                vcf = [line.strip() for line in f.readlines()]
+        elif:
+            with open (infile, 'r') as f:
+                vcf = [line.strip() for line in f.readlines()]
         genos = []
         header = []
         length = 0
@@ -43,7 +47,7 @@ class Variants():
 
     def genotype_convert(self, genoformat = None):
         if genoformat not in [None,'raw','numeric','base']:
-            print("genotype formate should be genoformat= 'raw', 'numeric' (0/1), or 'base' (A/G)")
+            sys.stderr.write("genotype format should be genoformat= 'raw', 'numeric' (0/1), or 'base' (A/G)")
         elif genoformat is None:
             return(self.rawgenotypes)
         elif genoformat == 'raw':

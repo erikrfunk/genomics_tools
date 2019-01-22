@@ -13,13 +13,13 @@ from VCFparser import Variants
 vcfPath = sys.argv[1] #vcf file to parse
 
 #Format genotypes to count
-print("Formatting genotypes")
+sys.stderr.write("Formatting genotypes")
 vcf = Variants(vcfPath)
 genotypeLines = vcf.genotype_convert(genoformat = 'numeric')
 
 #Tally will create a dict where the key is the variant number and value is the
 #proportion of individuals genotyped at that locus that are heterozygous
-print("Tallying heterozygotes per variant")
+sys.stderr.write("Tallying heterozygotes per variant")
 heteroCount = {}
 variantCount = 0
 
