@@ -33,6 +33,11 @@ def get_args():
         default = None,
         help = 'A file with sample names of individuals to include in the fasta'
     )
+    parser.add_argument(
+        '--output',
+        required = False,
+        default = 'output',
+        help = 'Prefix for output file')
     return parser.parse_args()
 
 
@@ -151,6 +156,7 @@ def main():
     #Make a new dict with each sample as key and the ref seq as value
     #Change variant sites in reference for each individual
     full_scaffold_dict = {}
+    fout = open(arguments.output, 'w')
     for id in alternate_alleles:
         temp_seq_list = [x for x in reference[scaffold]]
         for position in range(0,len(alternate_alleles[id])):
@@ -158,8 +164,8 @@ def main():
                     alternate_alleles[id][position]
         final_seq = temp_seq_list[start_pos-1:end_pos]
         final_seq = ''.join(final_seq)
-        print(">{}\n{}".format(id,final_seq))
-
+        fout.write(">{}\n{}\n".format(id,final_seq))
+    fout.close()
 
 
 ###############################################################################
