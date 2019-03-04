@@ -33,11 +33,6 @@ def get_args():
         default = None,
         help = 'A file with sample names of individuals to include in the fasta'
     )
-    parser.add_argument(
-        '--output',
-        required = False,
-        default = 'output',
-        help = 'Prefix for output file')
     return parser.parse_args()
 
 
@@ -111,7 +106,7 @@ def main():
 
     #Read in the reference sequence as dict with scaff name as key and seq as
     #value
-    sys.stderr.write("Reading in reference sequence\n")
+    sys.stderr.write("\nReading in reference sequence...\n")
     reference = {}
     with open(arguments.ref, 'r') as ref_file:
         for line in ref_file:
