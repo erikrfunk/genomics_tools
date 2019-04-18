@@ -20,7 +20,7 @@ class Variants():
         if re.match('.gz$',infile):
             with gzip.open(infile,'r') as f:
                 vcf = [line.strip() for line in f.readlines()]
-        elif:
+        else:
             with open (infile, 'r') as f:
                 vcf = [line.strip() for line in f.readlines()]
         genos = []
