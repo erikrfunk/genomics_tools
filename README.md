@@ -38,3 +38,19 @@ command in GATK but uses a random seed to sample different variants each time. \
 [--input] Name of input vcf \
 [--fraction] Fraction of variants to sample (from 0-1) \
 [--output] Defaults to 'random-variants.vcf'
+
+# avg-depth-from-DP.py
+Generating a vcf table from samtools 'mpileup' and bcftools 'call' seems not to
+include individual depth information in the format field of each variant. This
+prevents a few of VCFtools' filter functions from working. The samtools vcf does
+include the total variant depth in the info field of each variant. Using the
+--summary flag, this script generates a summary of the average depth for each variant by dividing the info field by the number of samples in the vcf table.
+Instead of calling the --summary argument, min and max values can be provided
+to filter over or under covered variants to remove potential copy number
+variants. \
+[--vcf] Name of input vcf file \
+[--output] Defaults to output.depth \
+[--summary] Set this to generate a summary only. No argument required. No
+filtering will occur, even if filters are set. \
+[--mindp] If summary flag is not set, variants below this value will be filtered
+[--maxdp] If summary flag is not set, variants above this value will be filtered
