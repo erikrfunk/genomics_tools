@@ -39,12 +39,14 @@ def get_args():
     )
     parser.add_argument(
         '--mindp',
+        type = float,
         required = False,
         default = 0,
         help = 'Minimum average depth for a variant'
     )
     parser.add_argument(
         '--maxdp',
+        type = float,
         required = False,
         default = -1,
         help = 'Maximum average depth for a variant'
@@ -106,17 +108,20 @@ def main():
     else:
         if arguments.maxdp == -1:
             maxdp = max(variant_depth_means)
-        sys.stderr.write("Filtering variants shallower than {} and deeper \
-            than {}.\n".format(arguments.mindp,maxdp))
+        else:
+            maxdp = arguments.maxdp
+        sys.stderr.write("Filtering variants shallower than {} and deeper" \
+        "than {}.\n".format(arguments.mindp,maxdp))
         fout = open(arguments.output, 'w')
         for line in info:
             fout.write("{}\n".format(line))
-        fout.write("{}\n".format(header))
+        fout.write("{}\n".format("\t".join(header)))
 
         for i in range(len(variant_depth_means)):
-            if (variant_depth_means[i] > arguments.mindp and
-            variant_depth_means[i] < maxdp):
-                fout.write("{}\n".format(genos[i]))
+            if (variant_depth_means[i] >= arguments.mindp and
+            variant_depth_means[i] <= maxdp):
+                genotype = "\t".join(genos[i])
+                fout.write("{}\n".format(genotype))
         fout.close()
 ###############################################################################
 
