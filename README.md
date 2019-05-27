@@ -52,5 +52,5 @@ variants. \
 [--output] Defaults to output.depth \
 [--summary] Set this to generate a summary only. No argument required. No
 filtering will occur, even if filters are set. \
-[--mindp] If summary flag is not set, variants below this value will be filtered
+[--mindp] If summary flag is not set, variants below this value will be filtered \
 [--maxdp] If summary flag is not set, variants above this value will be filtered
