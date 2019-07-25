@@ -54,6 +54,7 @@ def get_args():
         '--variants',
         required = False,
         default = False,
+        action = 'store_true',
         help = 'If true, only variant sites will be printed. Phylip only'
     )
     return parser.parse_args()
@@ -185,15 +186,16 @@ def main():
                                     variant_alleles[scaff][site]
                         new_seq = ''.join(new_seq)
                         consensus_sequence += new_seq
-            elif arguments.variants == 'True':
+            elif arguments.variants == True:
                 if line_counter == 0:
                     fout.write("{}\t{}\n".format(len(sample_list),variant_number))
                     line_counter += 1
                 consensus_sequence = ''
                 for scaff in reference:
                     if scaffold_list is None or scaff in scaffold_list:
-                        new_seq = ''.join(variant_alleles[scaff])
-                        consensus_sequence += new_seq
+                        if scaff in variant_alleles:
+                            new_seq = ''.join(variant_alleles[scaff])
+                            consensus_sequence += new_seq
             fout.write("{}\t{}\n".format(sample,consensus_sequence))
     else:
         for sample in sample_list:
