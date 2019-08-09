@@ -44,11 +44,12 @@ def main():
     #Find the invariant sites
     invariant_sites = []
     for pos in range(seq_length):
-        if pos+1 % 100000 == 0:
+        if (pos+1) % 100000 == 0:
             sys.stderr.write("\nBase {} of {}\n".format((pos+1),seq_length))
         pos_bases = []
         for sample in seqs:
             pos_bases.append(seqs[sample][pos])
+        pos_bases = [x for x in pos_bases if x != 'N']
         if len(set(pos_bases)) == 1:
             invariant_sites.append(pos)
 
