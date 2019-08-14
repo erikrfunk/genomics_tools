@@ -77,7 +77,7 @@ def main():
             del seq_list[site]
             prog = (float(invariant_sites.index(site))/
                     float(len(invariant_sites)))
-            if round((prog*100))%5 == 0:
+            if round((prog*100),5)%5 == 0:
                 sys.stderr.write("{} {}%\n".format(sample,100 -
                         round((prog*100))))
             #sys.stderr.write("Removing site {}\n".format(site))
