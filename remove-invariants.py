@@ -38,6 +38,17 @@ def main():
                 sample_num = line[0]
                 seq_length = int(line[1])
                 line_num += 1
+            elif line_num == 1:
+                if len(line[1]) != seq_length:
+                    sys.stderr.write("\nThe sequence length listed in phylip " +
+                            "header does not match the length of the of the " +
+                            "first sequence.\nYou may want to check this if " +
+                            "this file has been used in other analyses.\n\n")
+                    seq_length = len(line[1])
+                    line_num += 1
+                    seqs[line[0]] = line[1]
+                else:
+                    seqs[line[0]] = line[1]
             else:
                 seqs[line[0]] = line[1]
 
@@ -45,7 +56,8 @@ def main():
     invariant_sites = []
     for pos in range(seq_length):
         if (pos+1) % 100000 == 0:
-            sys.stderr.write("\nBase {} of {}\n".format((pos+1),seq_length))
+            sys.stderr.write("\nEvaluating base {} of {}\n".format((pos+1), \
+                    seq_length))
         pos_bases = []
         for sample in seqs:
             pos_bases.append(seqs[sample][pos])
@@ -59,9 +71,16 @@ def main():
     fout = open(arguments.output, 'w')
     fout.write("{}\t{}\n".format(sample_num,(seq_length-len(invariant_sites))))
     for sample in seqs:
+        sys.stderr.write("Writing {}\n".format(sample))
         seq_list = list(seqs[sample])
         for site in sorted(invariant_sites, reverse = True):
             del seq_list[site]
+            prog = (float(invariant_sites.index(site))/
+                    float(len(invariant_sites)))
+            if round((prog*100))%5 == 0:
+                sys.stderr.write("{} {}%\n".format(sample,100 -
+                        round((prog*100))))
+            #sys.stderr.write("Removing site {}\n".format(site))
         seqs[sample] = "".join(seq_list)
         fout.write("{}\t{}\n".format(sample,seqs[sample]))
     fout.close()
