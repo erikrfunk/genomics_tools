@@ -33,69 +33,68 @@ def get_args():
 ################################################################################
 # Functions
 
-def parse_vcf(input):
-    info = []
-    header = []
-    genos = []
-    num_samples = 0
-    with open(input,'r') as vcf_file:
-        for line in vcf_file:
-            if line[0:2] == '##':
-                info.append(line)
-            elif line.split()[0] == "#CHROM":
-                header = line.split()
-                num_samples = len(header[9:])
-            else:
-                line = line.split()
-                genos.append(line)
-    return info, header, genos, num_samples
-
-
-
-
-
 ################################################################################
 
 def main():
     arguments = get_args()
 
     sys.stderr.write("\nParsing VCF file...\n")
-    info_m, header_m, genos_m, num_samples_m = parse_vcf(arguments.input)
-
-    sys.stderr.write("\nCalculating SNP frequencies...\n")
     genotype_to_count = { 0:['0/0','./0','0/.'],
                           1:['0/1','1/0','1/.','./1'],
                           2:['1/1'],
                           9:['./.']
     }
     fout = open(arguments.output,'w')
-    for sample in range(num_samples_m):
-        sample_index = sample + 9
-        sample_name = header_m[sample_index]
-        sample_snp_counts = []
-        for snp_line in genos_m:
-            format_field = snp_line[sample_index]
-            genotype = format_field.split(':')[0]
-            for count in genotype_to_count:
-                if genotype in genotype_to_count[count]:
-                    sample_snp_counts.append(str(count))
-        if len(sample_snp_counts) != len(genos_m):
-            sys.stderr.write('One or more genotypes for {}'.format(sample_name)+
-            'recognized\n')
+    with open(arguments.input, 'r') as vcf:
+        info = []
+        header = []
+        allele_counts = {}
+        num_samples = 0
+        num_variants = 0
+        for line in vcf:
+            if line[0:2] == '##':
+                info.append(line)
+            elif line.split()[0] == "#CHROM":
+                header = line.split()
+                num_samples = len(header[9:])
+                for id in range(num_samples):
+                    id_index = id + 9
+                    allele_counts[header[id_index]] = []
+            else:
+                num_variants+=1
+                line = line.split()
+                if (num_variants) % 100000 == 0:
+                    sys.stderr.write("\nWriting site {}\n".format(num_variants))
+
+                for sample in range(num_samples):
+                    sample_index = sample + 9
+                    sample_name = header[sample_index]
+                    format_field = line[sample_index]
+                    genotype = format_field.split(':')[0]
+                    for count in genotype_to_count:
+                        if genotype in genotype_to_count[count]:
+                            allele_counts[sample_name].append(str(count))
+    for individual in allele_counts:
+        if len(allele_counts[individual]) != num_variants:
+            sys.stderr.write('One or more genotypes for ' +
+                    '{} are not recognized\n'.format(sample_name))
         else:
-            all_counts = '\t'.join(sample_snp_counts)
-            fout.write('{}\t{}\n'.format(sample_name,all_counts))
+            all_counts = '\t'.join(allele_counts[individual])
+            fout.write('{}\t{}\n'.format(individual,all_counts))
     fout.close()
 
     if arguments.locinames == True:
         sys.stderr.write("Writing names of loci to loci_names.txt\n")
         fout_names = open("loci_names.txt", 'w')
-        for line in genos_m:
-            name = []
-            name.append(line[0])
-            name.append(line[1])
-            name_out = ':'.join(name)
-            fout_names.write("{}\n".format(name_out))
+        with open(arguments.input, 'r') as vcf_2:
+            for line in vcf_2:
+                if line[0] != "#":
+                    line = line.split()
+                    name = []
+                    name.append(line[0])
+                    name.append(line[1])
+                    name_out = ':'.join(name)
+                    fout_names.write("{}\n".format(name_out))
         fout_names.close()
 
 
