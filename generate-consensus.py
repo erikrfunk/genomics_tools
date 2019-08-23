@@ -114,7 +114,9 @@ def parse_vcf(input_vcf, sample, scaffold_list):
                             sites[info[0]] = [info[1]]
                             variants[info[0]] = []
                         genotype = info[sample_index].split(':')
-                        if (genotype[0] == '0/0'):
+                        if (genotype[0] == '0/0' or
+                            genotype[0] == './0' or
+                            genotype[0] == '0/.'):
                             variants[info[0]].append(info[3])
                         elif (genotype[0] == '1/0' or
                               genotype[0] == '0/1' or
