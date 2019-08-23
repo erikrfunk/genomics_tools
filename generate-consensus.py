@@ -57,6 +57,12 @@ def get_args():
         action = 'store_true',
         help = 'If true, only variant sites will be printed. Phylip only'
     )
+    parser.add_argument(
+        '--output',
+        required = False,
+        default = "ConsensusSeqs",
+        help = "Name of output file"
+    )
     return parser.parse_args()
 
 
@@ -157,9 +163,9 @@ def main():
     #Parse the vcf and write the file
     file_format = arguments.format
     if file_format == 'phylip':
-        file_name = 'ConsensusSeqs.phylip'
+        file_name = arguments.output + '.phylip'
     else:
-        file_name = 'ConsensusSeqs.fasta'
+        file_name = arguments.output + '.fasta'
 
     fout = open(file_name, 'w')
     if file_format == 'phylip':
