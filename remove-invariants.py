@@ -62,7 +62,7 @@ def main():
         for sample in seqs:
             pos_bases.append(seqs[sample][pos])
         pos_bases = [x for x in pos_bases if x != 'N']
-        if len(set(pos_bases)) == 1:
+        if len(set(pos_bases)) == 1 or len(set(pos_bases)) == 0:
             invariant_sites.append(pos)
 
     sys.stderr.write("Removing {} invariant sites.\n".format(len(\
