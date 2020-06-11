@@ -55,7 +55,7 @@ def main():
     for line in header:
         fout.write("{}\n".format(line))
     for variant in sampled_variants:
-        fout.write("{}\n".format(variant))
+        fout.write("{}".format(variant))
     fout.close()
 
 
