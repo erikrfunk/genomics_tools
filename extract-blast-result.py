@@ -65,9 +65,11 @@ def trim_vcf(vcf,indivs,scaff,start,stop):
                             header.index(individual)+9
                 else:
                     line = line.split()
+
                     if (line[0] == scaff and int(line[1]) >= start and
                             int(line[1]) <= stop):
                         new_vcf.append(line)
+
     return new_vcf, sample_indicies
 
 
@@ -124,7 +126,6 @@ def main():
 
 
     #Get the location of the locus
-    sys.stderr.write("Extracting the location of the locus\n")
     scaffold = ''
     start_pos = 0
     end_pos = 0
@@ -132,10 +133,11 @@ def main():
         hits = [line.strip() for line in locus_file]
         best_hit = hits[0].split()
         scaffold = best_hit[1]
-        poses = best_hit[8:10]
-        start_pos = int(min(poses))
-        end_pos = int(max(poses))
-
+        poses = [int(x) for x in best_hit[8:10]]
+        start_pos = min(poses)
+        end_pos = max(poses)
+    sys.stderr.write("Extracting positions {}-{} of scaffold {}\n"\
+                    .format(start_pos,end_pos,scaffold))
 
     #call the vcf trim function defined above
     #First check to see if specific indivuals have been included
