@@ -133,8 +133,9 @@ def main():
         best_hit = hits[0]
         best_hit = best_hit.split()
         scaffold = best_hit[1]
-        start_pos = int(best_hit[8])
-        end_pos = int(best_hit[9])
+        poses = best_hit[7:9]
+        start_pos = int(min(poses))
+        end_pos = int(max(poses))
 
 
     #call the vcf trim function defined above
