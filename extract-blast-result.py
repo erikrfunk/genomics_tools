@@ -41,7 +41,7 @@ def get_args():
     return parser.parse_args()
 
 
-def trim_vcf(vcf,indvs,scaff,start,stop):
+def trim_vcf(vcf,indivs,scaff,start,stop):
     '''
     Trim the vcf to only include the relevant individuals,
     scaffold, and sites
@@ -54,9 +54,9 @@ def trim_vcf(vcf,indvs,scaff,start,stop):
                 if line[0] == '#':
                     line = line.split()
                     header = line[9:]
-                    if indvs is not None:
-                        sys.stderr.write("Retaining only:\n{}\n".format(indvs))
-                        for indvidual in indvs:
+                    if indivs is not None:
+                        sys.stderr.write("Retaining only:\n{}\n".format(indivs))
+                        for individual in indivs:
                             sample_indicies[individual] = \
                             header.index(individual)+9
                     else:
@@ -74,7 +74,7 @@ def trim_vcf(vcf,indvs,scaff,start,stop):
 def parse_trimmed_vcf(trimmed_vcf, sample_indicies):
     '''
     Parse a trimmed vcf file saved as variable from 'trim_vcf'
-    Creates a dict with indviduals as keys and alleles as values for all
+    Creates a dict with individuals as keys and alleles as values for all
     variant sites
     Only one allele is included per site
     If the individual posses at least one alternate allele, that allele is written
@@ -140,8 +140,8 @@ def main():
     #call the vcf trim function defined above
     #First check to see if specific indivuals have been included
     if arguments.indiv is not None:
-        with open(arguments.indv, 'r') as indv_file:
-            individuals = [line.strip() for line in indv_file.readlines()]
+        with open(arguments.indiv, 'r') as indiv_file:
+            individuals = [line.strip() for line in indiv_file.readlines()]
     else:
         individuals = None
     trimmed_vcf, indicies = trim_vcf(arguments.vcf, individuals, scaffold,
