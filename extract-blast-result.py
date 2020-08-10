@@ -130,7 +130,7 @@ def main():
     end_pos = 0
     with open(arguments.locus, 'r') as locus_file:
         hits = [line.strip() for line in locus_file]
-        best_hit = hits.split()[0]
+        best_hit = hits[0].split()
         scaffold = best_hit[1]
         poses = best_hit[8:10]
         start_pos = int(min(poses))
