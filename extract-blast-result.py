@@ -166,7 +166,11 @@ def main():
                     alternate_alleles[id][position]
         final_seq = temp_seq_list[start_pos-1:end_pos]
         final_seq = ''.join(final_seq)
-        fout.write(">{}\n{}\n".format(id,final_seq))
+        if poses[0] > poses[1]:
+            final_seq = final_seq[::-1] #Need to reverse the direction if the blast hit was reversed
+            fout.write(">{}\n{}\n".format(id,final_seq))
+        else:
+            fout.write(">{}\n{}\n".format(id,final_seq))
     fout.close()
 
 
