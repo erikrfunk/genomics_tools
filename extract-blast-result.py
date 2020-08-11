@@ -165,9 +165,11 @@ def main():
             temp_seq_list[int(variant_pos[position])-1] = \
                     alternate_alleles[id][position]
         final_seq = temp_seq_list[start_pos-1:end_pos]
-        final_seq = ''.join(final_seq)
-        if poses[0] > poses[1]:
-            final_seq = final_seq[::-1] #Need to reverse the direction if the blast hit was reversed
+        final_seq = "".join(final_seq)
+        if poses[0] > poses[1]: #See line 136 for poses[]
+            final_seq = final_seq[::-1] #Need to reverse complement if the blast hit was reversed
+            translate = {"A":"T","G":"C","T":"A","C":"G"}
+            final_seq = "".join([translate[x] for x in final_seq])
             fout.write(">{}\n{}\n".format(id,final_seq))
         else:
             fout.write(">{}\n{}\n".format(id,final_seq))
