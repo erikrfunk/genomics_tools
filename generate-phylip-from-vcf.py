@@ -8,6 +8,7 @@ Allele for heterozygotes is chosen at random.
 import sys
 import argparse
 import random
+import gzip
 from cyvcf2 import VCF
 
 def get_args():
@@ -39,11 +40,19 @@ def get_args():
     return parser.parse_args()
 
 def get_samples(input):
-    with open(input, 'r') as file:
-        for line in file:
-            if line[0] == '#' and line[0:2] != '##':
-                samples = line.split()[9:]
-    return samples
+    if input[-3:] == '.gz':
+        with gzip.open(input, 'rt') as file:
+            for line in file:
+                if line[0] == '#' and line[0:2] != '##':
+                    samples = line.split()[9:]
+                    return samples
+    else:
+        with open(input, 'r') as file:
+            for line in file:
+                if line[0] == '#' and line[0:2] != '##':
+                    samples = line.split()[9:]
+                    return samples
+
 
 def check_biallelic(input_vcf):
     alternates = []
