@@ -2,7 +2,7 @@
 '''
 Given a vcf file, this script will convert variants to phylip for the
 listed taxa. If no taxon file is provided, all individuals are included.
-Allele for heterozygotes is chosen at random.
+Allele for heterozygotes is chosen at random unless --derived flag is used.
 '''
 
 import sys
@@ -37,6 +37,20 @@ def get_args():
         action = 'store_true',
         help = 'If added, the alternate allele will always be used for heterozygotes'
     )
+    parser.add_argument(
+        '--check',
+        required = False,
+        default = False,
+        action = 'store_true',
+        help = "Performs a check to make sure all alleles are biallelic"
+    )
+    parser.add_argument(
+        '--lowmem',
+        required = False,
+        default = False,
+        action = 'store_true',
+        help = "Writes output for one individual at a time. Memory efficient at the expense of speed"
+    )
     return parser.parse_args()
 
 def get_samples(input):
@@ -64,7 +78,7 @@ def check_biallelic(input_vcf):
             biallelic = False
     return biallelic
 
-def parse_vcf(input_vcf, sample_idx,derived):
+def parse_vcf_lowmem(input_vcf, sample_idx, derived):
     variant_list = []
     for v in VCF(input_vcf):
         alleles = v.genotypes[sample_idx]
@@ -81,9 +95,44 @@ def parse_vcf(input_vcf, sample_idx,derived):
     return variant_list
 
 
+def parse_vcf(input_vcf, sample_idx, derived):
+    var=0
+    variant_list = []
+    for v in VCF(input_vcf):
+        ref = ''.join(v.REF)
+        alt = ''.join(v.ALT)
+        var_dict_derived = {
+        '00':ref, '0-1':ref, '-10':ref,
+        '11':alt, '1-1':alt, '-11':alt,
+        '01':alt, '10':alt,'-1-1':'N'
+        }
+        var_dict = {
+        '00':ref, '0-1':ref, '-10':ref,
+        '11':alt, '1-1':alt, '-11':alt,
+        '01':random.choice([ref,alt]), '10':random.choice([ref,alt]),'-1-1':'N'
+        }
+        alleles = [v.genotypes[x] for x in sample_idx]
+        genos = [str(x[0])+str(x[1]) for x in alleles]
+        if derived == True:
+            for key,value in var_dict_derived.items():
+                if key in genos:
+                    genos = [i.replace(key,value) for i in genos]
+        else:
+            for key,value in var_dict.items():
+                if key in genos:
+                    genos = [i.replace(key,value) for i in genos]
+        if var==0:
+            variant_list = genos
+        else:
+            variant_list = [x+y for x,y in zip(variant_list,genos)]
+        var+=1
+        if var % 50000 == 0:
+            print(str(var), "variants finished.")
+    return variant_list
+
 def main():
     arguments = get_args()
-
+    print(arguments)
     # Get an enumerated list of samples, and if an indv list is provided,
     # subsample it
     print("Retrieving samples.")
@@ -99,35 +148,43 @@ def main():
         idxs = [samples.index(x) for x in subsamples]
         sample_idxs = list(zip(idxs,subsamples)) # overwrites the original indx list
 
-    print("Writing variants for ", str(len(sample_idxs)))
+    print("Writing variants for", str(len(sample_idxs)), "samples.")
 
     # Check that all sites are biallelic by taking the length of the alternate
-    print("Checking variants.")
-    biallele_bool = check_biallelic(arguments.vcf)
-    if biallele_bool == False:
-        print("""
-        Some alternate variants have a length greater than one.
-        This might suggest a site that is more than biallelic.
-        Exiting...
-        """)
-        exit()
+    if arguments.check == True:
+        print("Checking variants.")
+        biallele_bool = check_biallelic(arguments.vcf)
+        if biallele_bool == False:
+            print("""
+            Some alternate variants have a length greater than one.
+            This might suggest a site that is more than biallelic.
+            Exiting...
+            """)
+            exit()
 
     # Iterate through the sample list and add variants to the phylip
-    f_out = open(str(arguments.output)+'.phylip','w')
-    count=0
-    for individual in sample_idxs:
-        id = str(individual[1])
-        idx = individual[0]
+    if arguments.lowmem == True:
+        f_out = open(str(arguments.output)+'.phylip','w')
+        count=0
+        for individual in sample_idxs:
+            id = str(individual[1])
+            idx = individual[0]
+            variants = parse_vcf_lowmem(arguments.vcf,idx,arguments.derived)
+            if count==0:
+                f_out.write('\t'.join((str(len(sample_idxs)),str(len(variants)),'\n')))
+                f_out.write('\t'.join((id,''.join(variants),'\n')))
+            else:
+                f_out.write('\t'.join((id,''.join(variants),'\n')))
+            count+=1
+            print(id, ' added.', str(len(sample_idxs)-count), 'remaining.')
+        f_out.close()
+    else:
+        idx = [x[0] for x in sample_idxs]
+        id = [x[1] for x in sample_idxs]
         variants = parse_vcf(arguments.vcf,idx,arguments.derived)
-        if count==0:
+        with open(str(arguments.output)+'.phylip','w') as f_out:
             f_out.write('\t'.join((str(len(sample_idxs)),str(len(variants)),'\n')))
-            f_out.write('\t'.join((id,''.join(variants),'\n')))
-        else:
-            f_out.write('\t'.join((id,''.join(variants),'\n')))
-        count+=1
-        print(id, ' added.', str(len(sample_idxs)-count), 'remaining.')
-    f_out.close()
-
+            [f_out.write('\t'.join([x[0],x[1],'\n'])) for x in list(zip(id,variants))]
 
 ############################
 
