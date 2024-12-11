@@ -86,6 +86,7 @@ def main():
 
     # Get an enumerated list of samples, and if an indv list is provided,
     # subsample it
+    print("Retrieving samples.")
     samples = get_samples(arguments.vcf)
     sample_idxs = [(a,b) for a,b in enumerate(samples)]
 
@@ -97,7 +98,11 @@ def main():
 
         idxs = [samples.index(x) for x in subsamples]
         sample_idxs = list(zip(idxs,subsamples)) # overwrites the original indx list
+
+    print("Writing variants for ", str(len(sample_idxs)))
+
     # Check that all sites are biallelic by taking the length of the alternate
+    print("Checking variants.")
     biallele_bool = check_biallelic(arguments.vcf)
     if biallele_bool == False:
         print("""
