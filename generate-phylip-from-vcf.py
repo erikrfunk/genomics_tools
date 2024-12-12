@@ -126,8 +126,9 @@ def parse_vcf(input_vcf, sample_idx, derived):
             variant_tmp = genos
         else:
             if var % 50000 == 0:
-                variant_list.append(variant_tmp)
                 print(str(var), "variants finished.")
+            if var % 10000 == 0:
+                variant_list.append(variant_tmp)
                 variant_tmp = genos
             else:
                 variant_tmp = [x+y for x,y in zip(variant_tmp,genos)]
