@@ -79,8 +79,7 @@ def main():
     invariant_sites = set(invariant_sites)
     for sample in seqs:
         sys.stderr.write("Writing {}\n".format(sample))
-        seq_list = list(seqs[sample])
-        trimmed_seq = del_invars(seq_list,invariant_sites)
+        trimmed_seq = del_invars(seqs[sample],invariant_sites)
         seqs[sample] = "".join(seq_list)
         fout.write("{}\t{}\n".format(sample,seqs[sample]))
     fout.close()
