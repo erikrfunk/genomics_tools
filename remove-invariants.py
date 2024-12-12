@@ -22,6 +22,11 @@ def get_args():
     )
     return parser.parse_args()
 
+
+def del_list_indexes(seq, idxs_to_del):
+    trimmed = [i for j, i in enumerate(seq) if j not in idxs_to_del]
+    return trimmed
+
 ################################################################################
 
 def main():
@@ -70,17 +75,12 @@ def main():
 
     fout = open(arguments.output, 'w')
     fout.write("{}\t{}\n".format(sample_num,(seq_length-len(invariant_sites))))
+
+    invariant_sites = set(invariant_sites)
     for sample in seqs:
         sys.stderr.write("Writing {}\n".format(sample))
         seq_list = list(seqs[sample])
-        for site in sorted(invariant_sites, reverse = True):
-            del seq_list[site]
-            prog = (float(invariant_sites.index(site))/
-                    float(len(invariant_sites)))
-            if round((prog*100),5)%5 == 0:
-                sys.stderr.write("{} {}%\n".format(sample,100 -
-                        round((prog*100))))
-            #sys.stderr.write("Removing site {}\n".format(site))
+        trimmed_seq = del_invars(seq_list,invariant_sites)
         seqs[sample] = "".join(seq_list)
         fout.write("{}\t{}\n".format(sample,seqs[sample]))
     fout.close()
