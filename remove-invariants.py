@@ -80,8 +80,7 @@ def main():
     for sample in seqs:
         sys.stderr.write("Writing {}\n".format(sample))
         trimmed_seq = del_invars(seqs[sample],invariant_sites)
-        seqs[sample] = "".join(seq_list)
-        fout.write("{}\t{}\n".format(sample,seqs[sample]))
+        fout.write("{}\t{}\n".format(sample,''.join(trimmed_seq)))
     fout.close()
 
 ################################################################################
