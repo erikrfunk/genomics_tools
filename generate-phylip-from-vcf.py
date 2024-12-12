@@ -98,6 +98,7 @@ def parse_vcf_lowmem(input_vcf, sample_idx, derived):
 def parse_vcf(input_vcf, sample_idx, derived):
     var=0
     variant_list = []
+    variant_tmp = []
     for v in VCF(input_vcf):
         ref = ''.join(v.REF)
         alt = ''.join(v.ALT)
@@ -121,14 +122,20 @@ def parse_vcf(input_vcf, sample_idx, derived):
             for key,value in var_dict.items():
                 if key in genos:
                     genos = [i.replace(key,value) for i in genos]
-        if var==0:
-            variant_list = genos
+        if var == 0:
+            variant_tmp = genos
         else:
-            variant_list = [x+y for x,y in zip(variant_list,genos)]
+            if var % 50000 == 0:
+                variant_list.append(variant_tmp)
+                print(str(var), "variants finished.")
+                variant_tmp = genos
+            else:
+                variant_tmp = [x+y for x,y in zip(variant_tmp,genos)]
+
         var+=1
-        if var % 50000 == 0:
-            print(str(var), "variants finished.")
-    return variant_list
+    variant_list.append(variant_tmp)
+    all_vars = [''.join(x) for x in zip(*variant_list)]
+    return all_vars
 
 def main():
     arguments = get_args()
