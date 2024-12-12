@@ -23,7 +23,7 @@ def get_args():
     return parser.parse_args()
 
 
-def del_list_indexes(seq, idxs_to_del):
+def del_invars(seq, idxs_to_del):
     trimmed = [i for j, i in enumerate(seq) if j not in idxs_to_del]
     return trimmed
 
